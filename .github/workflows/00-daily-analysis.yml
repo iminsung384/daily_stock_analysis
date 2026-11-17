@@ -472,6 +472,14 @@ jobs:
             export STOCK_LIST="600519"
           fi
 
+          # 스크리너 실행: 기존 STOCK_LIST + 한국 2종목 + 미국 2종목 자동 추가 (실패 시 기존 목록 유지)
+          if [ -f "screener.py" ]; then
+            SCREENED_STOCKS=$(python screener.py | tail -n 1 || true)
+            if [ -n "$SCREENED_STOCKS" ]; then
+              export STOCK_LIST="$SCREENED_STOCKS"
+            fi
+          fi
+
           # 处理 LITELLM YAML 配置文件
           if [ -n "$LITELLM_CONFIG_YAML" ] && [ -n "$LITELLM_CONFIG" ]; then
             echo "📝 使用 GitHub Actions Secrets/Variables 中的 LITELLM_CONFIG_YAML 配置"
@@ -599,12 +607,4 @@ jobs:
           if [ -f "logs/stock_analysis_$(date +%Y%m%d).log" ]; then
             echo "📜 最近日志（最后 30 行）:"
             tail -30 logs/stock_analysis_*.log 2>/dev/null || echo "无日志"
-          fi
-
-                    # 스크리너 실행: 기존 STOCK_LIST + 한국 2종목 + 미국 2종목 자동 추가 (실패 시 기존 목록 유지)
-          if [ -f "screener.py" ]; then
-            SCREENED_STOCKS=$(python screener.py | tail -n 1 || true)
-            if [ -n "$SCREENED_STOCKS" ]; then
-              export STOCK_LIST="$SCREENED_STOCKS"
-            fi
           fi
